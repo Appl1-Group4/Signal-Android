@@ -66,6 +66,7 @@ import org.thoughtcrime.securesms.service.LocalBackupListener;
 import org.thoughtcrime.securesms.service.RotateSenderCertificateListener;
 import org.thoughtcrime.securesms.service.RotateSignedPreKeyListener;
 import org.thoughtcrime.securesms.service.UpdateApkRefreshListener;
+import org.thoughtcrime.securesms.service.translation.TranslationService;
 import org.thoughtcrime.securesms.storage.StorageSyncHelper;
 import org.thoughtcrime.securesms.util.AppForegroundObserver;
 import org.thoughtcrime.securesms.util.AppStartup;
@@ -100,6 +101,7 @@ public class ApplicationContext extends MultiDexApplication implements AppForegr
   private ExpiringMessageManager expiringMessageManager;
   private ViewOnceMessageManager viewOnceMessageManager;
   private PersistentLogger       persistentLogger;
+  private TranslationService     translationService;
 
   public static ApplicationContext getInstance(Context context) {
     return (ApplicationContext)context.getApplicationContext();
@@ -145,6 +147,7 @@ public class ApplicationContext extends MultiDexApplication implements AppForegr
                                 Conscrypt.setUseEngineSocketByDefault(true);
                               }
                             })
+                            .addNonBlocking(this::initializeTranslateService)
                             .addBlocking("blob-provider", this::initializeBlobProvider)
                             .addNonBlocking(this::initializeRevealableMessageManager)
                             .addNonBlocking(this::initializeGcmCheck)
@@ -216,6 +219,10 @@ public class ApplicationContext extends MultiDexApplication implements AppForegr
       Log.w(TAG, "Build expired!");
       SignalStore.misc().markClientDeprecated();
     }
+  }
+
+  private void initializeTranslateService() {
+    translationService = new TranslationService(this);
   }
 
   private void initializeSecurityProvider() {

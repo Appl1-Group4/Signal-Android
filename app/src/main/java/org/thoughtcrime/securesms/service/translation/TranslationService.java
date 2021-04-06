@@ -50,7 +50,9 @@ public class TranslationService {
     private BroadcastReceiver languageChangeReceiver = null;
 
     private String currentSystemLanguage;
-    private Boolean isCurrentLanguageSupported;
+
+    // Set to false first as to make service not available before initialization completes
+    private Boolean isCurrentLanguageSupported = false;
 
     public TranslationService(Context context) {
         this.context = context;
