@@ -112,7 +112,7 @@ public class TranslationService {
 
             return supportedLanguage.translation.containsKey(language);
         } catch (IOException e) {
-            Log.e(TAG, "Error Getting Supported Language");
+            Log.e(TAG, "Error Getting Supported Language, " + e);
         }
 
         return false;
