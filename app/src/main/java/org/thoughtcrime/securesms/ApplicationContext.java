@@ -214,6 +214,10 @@ public class ApplicationContext extends MultiDexApplication implements AppForegr
     return persistentLogger;
   }
 
+  public TranslationService getTranslationService() {
+    return translationService;
+  }
+
   public void checkBuildExpiration() {
     if (Util.getTimeUntilBuildExpiry() <= 0 && !SignalStore.misc().isClientDeprecated()) {
       Log.w(TAG, "Build expired!");

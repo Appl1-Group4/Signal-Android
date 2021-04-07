@@ -83,6 +83,10 @@ import org.thoughtcrime.securesms.recipients.RecipientId;
 import org.thoughtcrime.securesms.ringrtc.IceCandidateParcel;
 import org.thoughtcrime.securesms.ringrtc.RemotePeer;
 import org.thoughtcrime.securesms.service.WebRtcCallService;
+import org.thoughtcrime.securesms.service.translation.TranslationService;
+import org.thoughtcrime.securesms.service.translation.exception.ResourcesNotAvailableException;
+import org.thoughtcrime.securesms.service.translation.exception.ResourcesOverLimitException;
+import org.thoughtcrime.securesms.service.translation.exception.SystemLanguageNotSupportedException;
 import org.thoughtcrime.securesms.sms.IncomingEncryptedMessage;
 import org.thoughtcrime.securesms.sms.IncomingEndSessionMessage;
 import org.thoughtcrime.securesms.sms.IncomingTextMessage;
@@ -1215,10 +1219,22 @@ public final class MessageContentProcessor {
       handleExpirationUpdate(content, message, Optional.absent(), groupId);
     }
 
+    TranslationService translationService = ApplicationContext.getInstance(context).getTranslationService();
+    String translatedBody = "";
+
+    try {
+      translatedBody = translationService.translate(body);
+    } catch (ResourcesOverLimitException | ResourcesNotAvailableException | SystemLanguageNotSupportedException e) {
+      Log.i("TranslateTest", "Got error "  + e);
+      translatedBody = e.getMessage();
+    }
+
+    Log.i("TranslateTest", "Translated " + body + " to be " + translatedBody);
+
     Long threadId;
 
     if (smsMessageId.isPresent() && !message.getGroupContext().isPresent()) {
-      threadId = database.updateBundleMessageBody(smsMessageId.get(), body).second();
+      threadId = database.updateBundleMessageBody(smsMessageId.get(), body + "\n\n" + translatedBody).second();
       log("Got text message : " + smsMessageId.get() + body);
     } else {
       notifyTypingStoppedFromIncomingMessage(recipient, content.getSender(), content.getSenderDevice());
@@ -1227,12 +1243,12 @@ public final class MessageContentProcessor {
           content.getSenderDevice(),
           message.getTimestamp(),
           content.getServerReceivedTimestamp(),
-          body,
+          body + "\n\n" + translatedBody,
           groupId,
           message.getExpiresInSeconds() * 1000L,
           content.isNeedsReceipt());
 
-      textMessage = new IncomingEncryptedMessage(textMessage, body);
+      textMessage = new IncomingEncryptedMessage(textMessage, body + "\n\n" + translatedBody);
       Optional<InsertResult> insertResult = database.insertMessageInbox(textMessage);
 
       if (insertResult.isPresent()) threadId = insertResult.get().getThreadId();
