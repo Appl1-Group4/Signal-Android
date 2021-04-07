@@ -3052,6 +3052,7 @@
     <string name="WallpaperCropActivity__error_setting_wallpaper">Error setting wallpaper.</string>
     <string name="WallpaperCropActivity__blur_photo">Blur photo</string>
 
+    <string name="translate_message">Translate Message</string>
     <!-- EOF -->
 
 </resources>

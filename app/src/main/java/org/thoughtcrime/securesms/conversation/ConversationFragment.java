@@ -919,6 +919,13 @@ public class ConversationFragment extends LoggingFragment {
     listener.handleReplyMessage(message);
   }
 
+  //Mencoba debug ikon UI
+
+  private void handleTranslateMessage () {
+    String TAG = "MyActivity";
+    Log.i(TAG, "Translation On");
+  }
+
   private void handleSaveAttachment(final MediaMmsMessageRecord message) {
     if (message.isViewOnce()) {
       throw new AssertionError("Cannot save a view-once message.");
@@ -1643,6 +1650,7 @@ public class ConversationFragment extends LoggingFragment {
         case R.id.action_multiselect: handleEnterMultiSelect(conversationMessage);                                          return true;
         case R.id.action_forward:     handleForwardMessage(conversationMessage);                                            return true;
         case R.id.action_download:    handleSaveAttachment((MediaMmsMessageRecord) conversationMessage.getMessageRecord()); return true;
+        case R.id.action_translate:   handleTranslateMessage();                                                             return true;
         default:                                                                                                            return false;
       }
     }
