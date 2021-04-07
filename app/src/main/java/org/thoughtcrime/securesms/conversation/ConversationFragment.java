@@ -29,6 +29,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -921,9 +922,15 @@ public class ConversationFragment extends LoggingFragment {
 
   //Mencoba debug ikon UI
 
-  private void handleTranslateMessage () {
+  private void handleTranslateMessage (ConversationMessage conversationMessage) {
+    // option tidak tersedia jika bubble merupakan bubble pengguna
+
+    // debug
     String TAG = "MyActivity";
-    Log.i(TAG, "Translation On");
+    SpannableString textContent = conversationMessage.getDisplayBody(requireContext());
+    String content = textContent.toString();
+
+    Log.i(TAG, content);
   }
 
   private void handleSaveAttachment(final MediaMmsMessageRecord message) {
@@ -1650,7 +1657,7 @@ public class ConversationFragment extends LoggingFragment {
         case R.id.action_multiselect: handleEnterMultiSelect(conversationMessage);                                          return true;
         case R.id.action_forward:     handleForwardMessage(conversationMessage);                                            return true;
         case R.id.action_download:    handleSaveAttachment((MediaMmsMessageRecord) conversationMessage.getMessageRecord()); return true;
-        case R.id.action_translate:   handleTranslateMessage();                                                             return true;
+        case R.id.action_translate:   handleTranslateMessage(conversationMessage);                                                             return true;
         default:                                                                                                            return false;
       }
     }
