@@ -22,6 +22,7 @@ import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -71,6 +72,7 @@ import org.signal.core.util.concurrent.SignalExecutors;
 import org.signal.core.util.logging.Log;
 import org.thoughtcrime.securesms.ApplicationContext;
 import org.thoughtcrime.securesms.ApplicationPreferencesActivity;
+import org.thoughtcrime.securesms.ExpirationDialog;
 import org.thoughtcrime.securesms.LoggingFragment;
 import org.thoughtcrime.securesms.PassphraseRequiredActivity;
 import org.thoughtcrime.securesms.R;
@@ -920,17 +922,40 @@ public class ConversationFragment extends LoggingFragment {
     listener.handleReplyMessage(message);
   }
 
-  //Mencoba debug ikon UI
+  private AlertDialog.Builder buildRemoteTranslateConfirmationDialog(ConversationMessage conversationMessage) {
+    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+
+    builder.setTitle("Confirm Translation");
+    builder.setMessage("Following conversation will be sent into Azure Server. \nContinue?")
+            .setIcon(R.drawable.translate_icon)
+            .setCancelable(true)
+            .setPositiveButton("Continue", new DialogInterface.OnClickListener() {
+              @Override
+              public void onClick(DialogInterface dialog, int which) {
+                  // nanti untuk tempat memunculkan hasil translate jika pengguna menyetujui
+                  String TAG = "MyActivity";
+                  SpannableString textContent = conversationMessage.getDisplayBody(requireContext());
+                  String content = textContent.toString();
+
+                  Log.i(TAG, content);
+                }
+              })
+            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+              @Override
+              public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+              }
+            });
+    return builder;
+  }
 
   private void handleTranslateMessage (ConversationMessage conversationMessage) {
-    // option tidak tersedia jika bubble merupakan bubble pengguna
-
     // debug
-    String TAG = "MyActivity";
-    SpannableString textContent = conversationMessage.getDisplayBody(requireContext());
-    String content = textContent.toString();
-
-    Log.i(TAG, content);
+    //String TAG = "MyActivity";
+    //SpannableString textContent = conversationMessage.getDisplayBody(requireContext());
+    //String content = textContent.toString();
+    //Log.i(TAG, content);
+    buildRemoteTranslateConfirmationDialog(conversationMessage).show();
   }
 
   private void handleSaveAttachment(final MediaMmsMessageRecord message) {
@@ -1657,7 +1682,7 @@ public class ConversationFragment extends LoggingFragment {
         case R.id.action_multiselect: handleEnterMultiSelect(conversationMessage);                                          return true;
         case R.id.action_forward:     handleForwardMessage(conversationMessage);                                            return true;
         case R.id.action_download:    handleSaveAttachment((MediaMmsMessageRecord) conversationMessage.getMessageRecord()); return true;
-        case R.id.action_translate:   handleTranslateMessage(conversationMessage);                                                             return true;
+        case R.id.action_translate:   handleTranslateMessage(conversationMessage);                                          return true;
         default:                                                                                                            return false;
       }
     }
@@ -1740,6 +1765,10 @@ public class ConversationFragment extends LoggingFragment {
         case R.id.menu_context_reply:
           maybeShowSwipeToReplyTooltip();
           handleReplyMessage(getSelectedConversationMessage());
+          actionMode.finish();
+          return true;
+        case R.id.menu_context_translate:
+          handleTranslateMessage(getSelectedConversationMessage());
           actionMode.finish();
           return true;
       }
